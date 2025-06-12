@@ -1,68 +1,60 @@
-from transacao import deposito, registrar_extrato, saque
-from utils import verificar_execedeu_saldo, verificar_limite, verificar_numero_saques
 from menu import menu
+from conta import criar_conta, listar_contas
+from usuario import criar_usuario
+from transacao import depositar, sacar, exibir_extrato
 
-menu = menu()
+def main():
+    LIMITE_SAQUES = 3
+    AGENCIA = "0001"
 
-saldo = 0
-limite = 500
-extrato = ""
-numero_saques = 0
-LIMITE_SAQUES = 3
+    saldo = 0
+    limite = 500
+    extrato = ""
+    numero_saques = 0
+    usuarios = []
+    contas = []
 
-while True:
+    while True:
+        opcao = menu()
 
-    opcao = input(menu)
+        if opcao == "d":
+            valor = float(input("Informe o valor do depósito: "))
 
-    if opcao == "d":
-        valor = float(input("Informe o valor do depósito: "))
+            saldo, extrato = depositar(saldo, valor, extrato)
 
-        if valor > 0:
+        elif opcao == "s":
+            valor = float(input("Informe o valor do saque: "))
 
-            saldo = deposito(valor, saldo)
-            extrato = registrar_extrato(valor, extrato)
-            print(f"Depósito de R$ {valor:.2f} realizado com sucesso!")
+            saldo, extrato = sacar(
+                saldo=saldo,
+                valor=valor,
+                extrato=extrato,
+                limite=limite,
+                numero_saques=numero_saques,
+                limite_saques=LIMITE_SAQUES,
+            )
+
+        elif opcao == "e":
+            exibir_extrato(saldo, extrato=extrato)
+
+        elif opcao == "nu":
+            criar_usuario(usuarios)
+
+        elif opcao == "nc":
+            numero_conta = len(contas) + 1
+            conta = criar_conta(AGENCIA, numero_conta, usuarios)
+
+            if conta:
+                contas.append(conta)
+
+        elif opcao == "lc":
+            listar_contas(contas)
+
+        elif opcao == "q":
+            break
 
         else:
-            print("O valor do depósito deve ser maior que 0 (Zero).")
+            print("Operação inválida, por favor selecione novamente a operação desejada.")
 
-    elif opcao == "s":
-        valor = float(input("Informe o valor do saque: "))
 
-        excedeu_saldo = verificar_execedeu_saldo(valor, saldo)
-
-        excedeu_limite = verificar_limite(valor, limite)
-
-        excedeu_saques = verificar_numero_saques(numero_saques, LIMITE_SAQUES)
-
-        if excedeu_saldo:
-            print("Operação falhou! Você não tem saldo suficiente.")
-
-        elif excedeu_limite:
-            print("Operação falhou! O valor do saque excede o limite.")
-
-        elif excedeu_saques:
-            print("Operação falhou! Número máximo de saques excedido.")
-
-        elif valor > 0:
-
-            saldo = saque(valor, saldo)
-            extrato = registrar_extrato(valor, extrato)
-            numero_saques += 1
-            excedeu_saques = verificar_numero_saques(numero_saques, LIMITE_SAQUES)
-            print(f"Saque de R$ {valor:.2f} realizado com sucesso!")
-
-        else:
-            print("Operação falhou! O valor informado é inválido.")
-
-    elif opcao == "e":
-        print("\n================ EXTRATO ================")
-        print("Não foram realizadas movimentações." if not extrato else extrato)
-        print(f"\nSaldo: R$ {saldo:.2f}")
-        print("==========================================")
-
-    elif opcao == "q":
-        break
-
-    else:
-        print("Operação inválida, por favor selecione novamente a operação desejada.")
+main()
