@@ -4,7 +4,11 @@ from models.pessoa_fisica import PessoaFisica
 from models.conta_corrente import ContaCorrente
 from models.iterador_conta import Iterador
 from datetime import datetime
+from pathlib import Path
 import textwrap
+
+ROOT_DIR = Path(__file__).parent.parent
+
 
 def menu():
     menu = """\n
@@ -22,7 +26,13 @@ def menu():
 def log_transacao(func):
     def envelope(*args, **kwargs):
         resultado = func(*args, **kwargs)
-        print(f"{datetime.now()}: {func.__name__.upper()}")
+        data_hora = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+        #TODO: alterar a implementação para salvar em um arquivo
+        # f[data_hora] = Função '{func.__name__.upper()} executada com argumentos {args} e {kwargs}. Retornou {resultado}\n'
+        with open(ROOT_DIR / "logs/log.txt", "a") as arquivo:
+            dados_log = f"[{data_hora}]: Funcao '{func.__name__.upper()}' executada com argumentos {args} e {kwargs}. Retornou {resultado}\n"
+            arquivo.write(dados_log)
+        #print(f"{data_hora}: {func.__name__.upper()}")
         return resultado
 
     return envelope
